@@ -2,36 +2,61 @@ import requests
 import certifi
 import json
 from bs4 import BeautifulSoup
+from time import sleep
 
-book_path = "https://new.myubam.com/p/7821/alices-adventures-in-wonderland-illustrated-originals-ir"
-product = requests.get(book_path, verify=certifi.where()).text
-
-soup = BeautifulSoup(product, features='html.parser')
+with open('product_links.json') as product_links:
+    products = list(json.load(product_links))
 
 books = {}
 
-# loop starts here
-book_scrape = {}
+for book_path in products:
+    try:
+        # loop starts here
+        book_id = book_path[book_path.index('/p') + 3:book_path.rfind('/')]
 
-h1 = soup.find('h1', {'class': 'productname'})
-book_scrape['title'] = h1.text.strip()
+        product = requests.get(book_path, verify=certifi.where()).text
 
-stats = soup.find('div', {'class': 'product-variant-list'})
-stats_table = stats.find('table')
-stats_body = stats_table.find('tbody')
-stats_rows = stats_table.find_all('tr')[0:2]
+        soup = BeautifulSoup(product, features='html.parser')
 
-headers = []
-values = []
+        book_scrape = {}
 
-for row in stats_rows:
-    headers = headers + [th.text.strip() for th in row.find_all('th')]
-    values = values + [td.text.strip() for td in row.find_all('td')];
+        # get title
+        h1 = soup.find('h1', {'class': 'productname'})
+        book_scrape['title'] = h1.text.strip()
 
-book_scrape['details'] = dict(zip(headers, values))
-books.append(book_scrape)
+        # get price, hardback/softback, etc
+        stats = soup.find('div', {'class': 'product-variant-list'})
+        stats_table = stats.find('table')
+        stats_body = stats_table.find('tbody')
+        stats_rows = stats_table.find_all('tr')[0:2]
+
+        headers = []
+        values = []
+
+        for row in stats_rows:
+            headers = headers + [th.text.strip().lower() for th in row.find_all('th')]
+            values = values + [td.text.strip() for td in row.find_all('td')];
+
+        book_scrape.update(dict(zip(headers, values)))
+
+        book_scrape['overview'] = soup.find('div', {'id': 'tabs-1'}).text.strip()
+
+        # get table details
+        productspec_page = requests.get("https://new.myubam.com/ProductTab/ProductSpecifications/" + book_id, verify=certifi.where()).text
+        productspec = BeautifulSoup(productspec_page, features='html.parser')
+
+        spectab = productspec.find('table')
+        for tr in spectab.find_all('tr'):
+            tds = tr.find_all('td')
+            if len(tds) > 0 and len(tds[0].text.strip()) > 0:
+                book_scrape[tds[0].text.strip().lower()] = tds[1].text.strip()
+
+        with open(book_id + '.json', 'w') as catalog:
+            json.dump(book_scrape, catalog)
+            print("wrote", book_id + '.json')
+        sleep(5)
+    except:
+        print("Error on book", book_id)
 
 # loop ends here
 
-with open('full_catalogue.json', 'w') as catalog:
-    json.dump(books)
