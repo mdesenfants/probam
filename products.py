@@ -5,6 +5,7 @@ import os
 from bs4 import BeautifulSoup
 from time import sleep
 from datetime import datetime
+import IPython.utils.tests.test_module_paths
 
 with open('product_links.json') as product_links:
     products = list(json.load(product_links))
@@ -15,6 +16,10 @@ for book_path in products:
     try:
         # loop starts here
         book_id = book_path[book_path.index('/p') + 3:book_path.rfind('/')]
+
+        if os.path.exists('./products/' + book_id + '.json'):
+            print('Skipping', book_id, 'because it already exists.')
+            continue
 
         product = requests.get(book_path, verify=certifi.where()).text
 
@@ -44,15 +49,18 @@ for book_path in products:
         book_scrape['overview'] = soup.find('div', {'id': 'tabs-1'}).text.strip()
 
         # get table details
-        productspec_page = requests.get("https://new.myubam.com/ProductTab/ProductSpecifications/" + book_id, verify=certifi.where()).text
-        productspec = BeautifulSoup(productspec_page, features='html.parser')
+        try:
+            productspec_page = requests.get("https://new.myubam.com/ProductTab/ProductSpecifications/" + book_id, verify=certifi.where()).text
+            productspec = BeautifulSoup(productspec_page, features='html.parser')
 
-        spectab = productspec.find('table')
-        for tr in spectab.find_all('tr'):
-            tds = tr.find_all('td')
-            if len(tds) > 0 and len(tds[0].text.strip()) > 0:
-                key = tds[0].text.strip().lower()
-                book_scrape[key] = tds[1].text.strip()
+            spectab = productspec.find('table')
+            for tr in spectab.find_all('tr'):
+                tds = tr.find_all('td')
+                if len(tds) > 0 and len(tds[0].text.strip()) > 0:
+                    key = tds[0].text.strip().lower()
+                    book_scrape[key] = tds[1].text.strip()
+        except:
+            pass
 
         try:
             os.mkdir('./products')
@@ -64,7 +72,7 @@ for book_path in products:
             json.dump(book_scrape, catalog)
             print("wrote", book_id + '.json')
         sleep(5)
-    except KeyboardInterrupt:
+    except (KeyboardInterrupt, SystemExit):
         raise
     except:
         print("Error for product", book_id)
