@@ -1,8 +1,10 @@
 import requests
 import certifi
 import json
+import os
 from bs4 import BeautifulSoup
 from time import sleep
+from datetime import datetime
 
 with open('product_links.json') as product_links:
     products = list(json.load(product_links))
@@ -49,14 +51,23 @@ for book_path in products:
         for tr in spectab.find_all('tr'):
             tds = tr.find_all('td')
             if len(tds) > 0 and len(tds[0].text.strip()) > 0:
-                book_scrape[tds[0].text.strip().lower()] = tds[1].text.strip()
+                key = tds[0].text.strip().lower()
+                book_scrape[key] = tds[1].text.strip()
 
-        with open(book_id + '.json', 'w') as catalog:
+        try:
+            os.mkdir('./products')
+        except:
+            pass
+
+        book_scrape['timestamp'] = datetime.now().isoformat()
+        with open('./products/' + book_id + '.json', 'w') as catalog:
             json.dump(book_scrape, catalog)
             print("wrote", book_id + '.json')
         sleep(5)
+    except KeyboardInterrupt:
+        raise
     except:
-        print("Error on book", book_id)
+        print("Error for product", book_id)
 
 # loop ends here
 
