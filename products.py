@@ -5,7 +5,6 @@ import os
 from bs4 import BeautifulSoup
 from time import sleep
 from datetime import datetime
-import IPython.utils.tests.test_module_paths
 
 with open('product_links.json') as product_links:
     products = list(json.load(product_links))

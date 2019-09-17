@@ -14,7 +14,7 @@ visited = set()
 if path.exists('product_links.json'):
     with open('product_links.json', 'r') as infile:
         products = json.load(infile)
-        print(len(products))
+        print(len(products), "products listed. Delete product_links.json to reset.")
 else:
     for url in urls:
         if url in visited:
