@@ -12,6 +12,7 @@ beautifulsoup4 = "*"
 pylint = "*"
 requests = "*"
 certifi = "*"
+nltk = "*"
 
 [requires]
 python_version = "3.7"
