@@ -60,7 +60,7 @@ for f in files:
         gram1 = [[ng for ng in ngrams(s, 1)] for s in stemmed]
         gram2 = [[ng for ng in ngrams(s, 2)] for s in stemmed]
         gram1_strings = [[s[0] for s in g] for g in gram1]
-        gram2_strings = [[" ".join(s) for s in g] for g in gram2]
+        gram2_strings = [["".join(s) for s in g] for g in gram2]
 
         # accumulate all ngrams into flat list
         singles = [item for sublist in gram1_strings for item in sublist]
