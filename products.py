@@ -45,7 +45,7 @@ for book_path in products:
 
         book_scrape.update(dict(zip(headers, values)))
 
-        book_scrape['overview'] = soup.find('div', {'id': 'tabs-1'}).text.strip()
+        book_scrape['overview'] = soup.find('div', {'id': 'tabs-1'}).get_text(separator=' ').strip()
 
         # get table details
         try:
