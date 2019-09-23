@@ -5,6 +5,7 @@ verify_ssl = true
 
 [dev-packages]
 autopep8 = "*"
+pylint = "*"
 
 [packages]
 pipenv = "*"
@@ -17,6 +18,8 @@ nltk = "*"
 matplotlib = "*"
 numpy = "*"
 pandas = "*"
+az = "*"
+azure = "*"
 
 [requires]
 python_version = "3.7"
