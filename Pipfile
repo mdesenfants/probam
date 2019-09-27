@@ -18,8 +18,8 @@ nltk = "*"
 matplotlib = "*"
 numpy = "*"
 pandas = "*"
-az = "*"
 azure = "*"
+scipy = "*"
 
 [requires]
 python_version = "3.7"
