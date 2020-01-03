@@ -41,7 +41,7 @@ for book_path in products:
 
         for row in stats_rows:
             headers = headers + [th.text.strip().lower() for th in row.find_all('th')]
-            values = values + [td.text.strip() for td in row.find_all('td')];
+            values = values + [td.text.strip() for td in row.find_all('td')]
 
         book_scrape.update(dict(zip(headers, values)))
 
