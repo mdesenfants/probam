@@ -15,7 +15,8 @@ euclid_distance = 100000000000
 euc_win_shape = []
 euc_win_id = -1
 
-starter = "./shapes/5071.json"
+# pick a search reference document
+starter = "./shapes/10.json"
 with open(starter) as shape_file:
     shape = json.load(shape_file)
     product_id = ntpath.basename(starter).split('.')[0]
@@ -24,14 +25,18 @@ with open(starter) as shape_file:
 
 print("starting")
 
+# Get distances (euclidean and cosine)
 for f in files:
     with open(f) as shape_file:
         shape = json.load(shape_file)
         product_id = ntpath.basename(f).split('.')[0]
 
+        # if no starter was selected, pick one now
         if len(initial) == 0 and product_id != initial_id:
             initial_id = product_id
             initial = shape
+        
+        # if the product ids don't match, calculate distances
         elif product_id != initial_id:
             curr_dist = spatial.distance.cosine(initial, shape)
             if curr_dist < winning_distance:

@@ -30,7 +30,7 @@ try:
 except:
     pass
 
-sum_size = 20
+sum_size = 20 # buckets available in my vector
 term_frequencies = []
 shapes = []
 maxes = [0 for i in range(0, sum_size)]
@@ -50,13 +50,21 @@ for f in files:
         overview = re.sub(
             r'((?<=[a-z])[A-Z]|(?<!\A)[A-Z](?=[a-z]))', r' \1', product['title'] + ' ' + product['overview'])
 
+        # clear punctuation
         overview = ''.join([c for c in overview if c.isalnum()
                             or c.isspace() or c in string.punctuation])
 
+        # get sentences
         sentences = sent_tokenize(overview)
+
+        # tokenize the sentences themselves
         tokens = [tokenizer.tokenize(s) for s in sentences]
+
+        # stem or lemmatize the words in each sentence
         stemmed = [[lemma.lemmatize(w.lower())
                     for w in t if w not in stop_words] for t in tokens]
+
+        # build lists of ngrams
         gram1 = [[ng for ng in ngrams(s, 1)] for s in stemmed]
         gram2 = [[ng for ng in ngrams(s, 2)] for s in stemmed]
         gram1_strings = [[s[0] for s in g] for g in gram1]
@@ -65,14 +73,15 @@ for f in files:
         # accumulate all ngrams into flat list
         singles = [item for sublist in gram1_strings for item in sublist]
         doubles = [item for sublist in gram2_strings for item in sublist]
-        combined = singles + doubles
+        combined = singles + doubles # final array of all ngrams
 
-        # contribute these grams to global document frequency
+        # get one-hot encoded flag for each present word in document
         local_df = {}
         for c in combined:
             if c not in local_df.keys():
                 local_df[c] = 1
         
+        # go through all unique words in document and add them to the document frequency
         for f in local_df:
             if f in df.keys():
                 df[f] = df[f] + 1
@@ -89,6 +98,7 @@ for f in files:
         
         term_frequencies.append([product_id, len(combined), tf])
 
+# Build vector sumamries of each document
 for docs in term_frequencies:
     # dimensionality reduction here
     total_doc_count = len(files)
@@ -100,12 +110,14 @@ for docs in term_frequencies:
 
     shapes.append([docs[0]] + sums)
 
+    # save the vector (shape) file
     with open('./shapes/' + docs[0] + '.json', 'w') as shapefile:
         json.dump(sums, shapefile)
 
     N = len(sums)
     maxes = [max(x[0], x[1]) for x in zip(sums, maxes)]
 
+# make a visual representation for everything for the wetware with Pyplot
 for values in shapes:
     # We are going to plot the first line of the data frame.
     # But we need to repeat the first value to close the circular graph:

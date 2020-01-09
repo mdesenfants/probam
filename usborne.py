@@ -36,7 +36,7 @@ else:
             elif '/c/' in href:
                 urls.append(href)
         
-        sleep(5)
+        sleep(5) # don't DDOS the poor folks
 
     with open('product_links.json', 'w') as outfile:
         json.dump([p for p in products], outfile)
